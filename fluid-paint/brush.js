@@ -21,26 +21,13 @@ var Brush = (function () {
         this.maxBristleCount = maxBristleCount;
         this.bristleCount = maxBristleCount; //number of bristles currently being used
 
-        // [atelier] 붓을 눕힌 각도. 한 붓 안에서는 고정이다.
-        this.tilt = 0.0;            //라디안. 0 이면 수직으로 세운 붓
-        this.tiltDirection = 0.0;   //어느 쪽으로 눕혔는지
-
-        // [atelier] 고정할 마디 수. 1 이면 원본과 같다(뿌리만 고정).
-        // 2 면 붓대의 첫 마디까지 고정되어 쥔 각도가 획 내내 유지된다.
-        this.pinnedCount = 6;
-
-        // [atelier] 붓털이 얼마나 뻣뻣한가. 원본은 0.3 고정이라 붓털이 흐물거려
-        // 끝이 뒤로 길게 끌렸고, 그 궤적이 빗살로 남았다.
-        this.stiffness = STIFFNESS_VARIATION;
-
-        // [atelier] 붓털이 얼마나 모여 있는가. 1 이면 원본.
-        this.gather = 1.0;
-
-        // [atelier] 붓털 밀도 분포. 0.5 가 원본(균일), 높을수록 가운데가 빽빽하다.
-        this.density = 0.65;
-
-        // [atelier] 붓털을 캔버스로 누르는 힘. 원본은 30 고정이다.
-        this.gravity = GRAVITY;
+        // [atelier] 붓의 생김새. 원래는 전부 상수였다. 붓 종류를 바꿀 수 있게 열어 둔다.
+        // 기본값은 원본과 같으므로, 건드리지 않으면 동작이 달라지지 않는다.
+        this.layout = 0;               // 0 둥근붓 · 1 납작붓 · 2 부채붓
+        this.aspect = 1.0;             // 획 폭 쪽으로 눌린 정도
+        this.bristleLength = BRISTLE_LENGTH;
+        this.jitter = BRISTLE_JITTER;
+        this.stiffnessVariation = STIFFNESS_VARIATION;
 
 
         this.projectProgram = wgl.createProgram(
@@ -221,13 +208,11 @@ var Brush = (function () {
             .uniform3f('u_brushPosition', this.positionX, this.positionY, this.positionZ)
             .uniform1f('u_brushScale', this.scale)
             .uniform1f('u_bristleCount', this.bristleCount)
-            .uniform1f('u_bristleLength', BRISTLE_LENGTH)
+            .uniform1f('u_bristleLength', this.bristleLength)
             .uniform1f('u_verticesPerBristle', VERTICES_PER_BRISTLE)
-            .uniform1f('u_jitter', BRISTLE_JITTER)
-            .uniform1f('u_tilt', this.tilt)
-            .uniform1f('u_gather', this.gather)
-            .uniform1f('u_density', this.density)
-            .uniform1f('u_tiltDirection', this.tiltDirection)
+            .uniform1f('u_jitter', this.jitter)
+                .uniform1f('u_layout', this.layout)
+                .uniform1f('u_aspect', this.aspect)
             .uniform2f('u_resolution', this.maxBristleCount, VERTICES_PER_BRISTLE)
             .uniformTexture('u_randomsTexture', 2, wgl.TEXTURE_2D, this.randomsTexture)
 
@@ -254,9 +239,11 @@ var Brush = (function () {
                 .uniform3f('u_brushPosition', this.positionX, this.positionY, this.positionZ)
                 .uniform1f('u_brushScale', this.scale)
                 .uniform1f('u_bristleCount', this.bristleCount)
-                .uniform1f('u_bristleLength', BRISTLE_LENGTH)
+                .uniform1f('u_bristleLength', this.bristleLength)
                 .uniform1f('u_verticesPerBristle', VERTICES_PER_BRISTLE)
-                .uniform1f('u_jitter', BRISTLE_JITTER)
+                .uniform1f('u_jitter', this.jitter)
+                .uniform1f('u_layout', this.layout)
+                .uniform1f('u_aspect', this.aspect)
                 .uniform2f('u_resolution', this.maxBristleCount, VERTICES_PER_BRISTLE)
                 .uniformTexture('u_randomsTexture', 2, wgl.TEXTURE_2D, this.randomsTexture)
 
@@ -306,7 +293,7 @@ var Brush = (function () {
             .uniformTexture('u_velocitiesTexture', 1, wgl.TEXTURE_2D, this.velocitiesTexture)
             .uniformTexture('u_randomsTexture', 2, wgl.TEXTURE_2D, this.randomsTexture)
             
-            .uniform1f('u_gravity', this.gravity)
+            .uniform1f('u_gravity', GRAVITY)
 
             .uniform1f('u_damping', BRUSH_DAMPING)
             .uniform1f('u_verticesPerBristle', VERTICES_PER_BRISTLE)
@@ -322,21 +309,17 @@ var Brush = (function () {
         var setBristlesDrawState = wgl.createDrawState()
             
             .bindFramebuffer(this.simulationFramebuffer)
-            // [atelier] 원본은 1행(뿌리)만 다시 박았다. 붓대 각도를 유지하려면
-            // 첫 마디까지 다시 박아야 한다.
-            .viewport(0, 0, this.bristleCount, this.pinnedCount)
+            .viewport(0, 0, this.bristleCount, 1)
 
             .useProgram(this.setBristlesProgram)
             
             .uniform3f('u_brushPosition', this.positionX, this.positionY, this.positionZ)
             .uniform1f('u_brushScale', this.scale)
             .uniform1f('u_bristleCount', this.bristleCount)
-            .uniform1f('u_bristleLength', BRISTLE_LENGTH)
-            .uniform1f('u_jitter', BRISTLE_JITTER)
-            .uniform1f('u_tilt', this.tilt)
-            .uniform1f('u_gather', this.gather)
-            .uniform1f('u_density', this.density)
-            .uniform1f('u_tiltDirection', this.tiltDirection)
+            .uniform1f('u_bristleLength', this.bristleLength)
+            .uniform1f('u_jitter', this.jitter)
+                .uniform1f('u_layout', this.layout)
+                .uniform1f('u_aspect', this.aspect)
             .uniform1f('u_verticesPerBristle', VERTICES_PER_BRISTLE)
             .uniform2f('u_resolution', this.maxBristleCount, VERTICES_PER_BRISTLE)
 
@@ -368,8 +351,7 @@ var Brush = (function () {
 
                     .uniformTexture('u_positionsTexture', 0, wgl.TEXTURE_2D, this.projectedPositionsTexture)
                     .uniform1f('u_pointCount', VERTICES_PER_BRISTLE)
-                    .uniform1f('u_targetDistance', this.scale * BRISTLE_LENGTH / (VERTICES_PER_BRISTLE - 1))
-                    .uniform1f('u_pinnedCount', this.pinnedCount)
+                    .uniform1f('u_targetDistance', this.scale * this.bristleLength / (VERTICES_PER_BRISTLE - 1))
                     .uniform1i('u_pass', pass)
                     .uniform2f('u_resolution', this.maxBristleCount, VERTICES_PER_BRISTLE)
 
@@ -396,8 +378,7 @@ var Brush = (function () {
                     .uniformTexture('u_positionsTexture', 0, wgl.TEXTURE_2D, this.projectedPositionsTexture)
                     .uniformTexture('u_randomsTexture', 1, wgl.TEXTURE_2D, this.randomsTexture)
                     .uniform1f('u_pointCount', VERTICES_PER_BRISTLE)
-                    .uniform1f('u_stiffnessVariation', this.stiffness)
-                    .uniform1f('u_pinnedCount', this.pinnedCount)
+                    .uniform1f('u_stiffnessVariation', this.stiffnessVariation)
                     .uniform1i('u_pass', pass)
                     .uniform2f('u_resolution', this.maxBristleCount, VERTICES_PER_BRISTLE)
 
@@ -421,9 +402,6 @@ var Brush = (function () {
                 .useProgram(this.planeConstraintProgram)
 
                 .uniformTexture('u_positionsTexture', 0, wgl.TEXTURE_2D, this.projectedPositionsTexture)
-                // [atelier] 붓털 다발이 붓대에서 흩어지지 않게 묶는다
-                .uniform2f('u_brushPosition', this.positionX, this.positionY)
-                .uniform1f('u_maxRadius', this.gather * this.scale)
                 .uniform2f('u_resolution', this.maxBristleCount, VERTICES_PER_BRISTLE)
 
                 .vertexAttribPointer(this.quadVertexBuffer, this.planeConstraintProgram.getAttribLocation('a_position'), 2, wgl.FLOAT, false, 0, 0);

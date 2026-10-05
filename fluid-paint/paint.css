@@ -14,8 +14,9 @@ body {
 }
 
 #ui {
-    /* [atelier] pointer-events 는 none 으로 둔다 — auto 로 두면 이 div 가 클릭을
-       가로채서, 밑의 캔버스에 WebGL 로 그려 둔 색 고르개를 집을 수 없다.
+    /* [atelier] 옵션이 늘면서 내용이 창보다 길어졌다. 창을 넘으면 스크롤한다.
+       그래도 pointer-events 는 none 으로 둔다 — auto 로 두면 이 div 가 클릭을
+       가로채서, 밑의 캔버스에 WebGL 로 그려 둔 색상환을 집을 수 없다.
        버튼·슬라이더·팔레트만 각자 auto 다. 휠 스크롤은 onWheel 이 처리한다. */
     pointer-events: none;
 
@@ -25,14 +26,15 @@ body {
     left: 0;
 
     width: 300px;
-
-    /* 옵션이 늘면서 내용이 창보다 길어졌다. 창을 넘으면 스크롤한다. */
     max-height: 100vh;
     overflow-y: auto;
     overflow-x: hidden;
 
     scrollbar-width: thin;
     scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
+
+    /* [atelier] 접을 수 있게 한다. 패널이 캔버스를 가리기 때문이다. */
+    transition: transform 180ms ease;
 }
 
 #ui::-webkit-scrollbar {
@@ -46,6 +48,12 @@ body {
 
 #ui::-webkit-scrollbar-track {
     background: transparent;
+}
+
+
+
+#ui.collapsed {
+    transform: translateX(-100%);
 }
 
 
@@ -98,15 +106,14 @@ body {
 
 .control-label {
     margin-left: 30px;
-    /* [atelier] 슬라이더가 늘어 패널이 창을 넘는다. 줄 간격을 줄였다. */
-    margin-top: 4px;
+    margin-top: 9px;
 
     color: white;
     font-size: 12px;
 }
 
 .slider {
-    margin-top: 1px;
+    margin-top: 3px;
     margin-left: 30px;
 
     position: relative;
@@ -181,10 +188,11 @@ body {
 #instructions {
     position: absolute;
 
-    /* [atelier] 슬라이더가 늘면서 패널이 안내문 자리까지 내려왔다 */
+    /* [atelier] 왼쪽 아래는 이제 패널이 쓴다. 두 패널 사이에 눕힌다.
+       50% 기준으로 가운데 맞추면 왼쪽 패널 폭만큼 밀려 잘린다. */
     bottom: 10px;
-    left: 320px;
-    right: 20px;
+    left: 312px;
+    right: 224px;
 
     display: flex;
     flex-wrap: wrap;
@@ -202,6 +210,12 @@ body {
     font-weight: bold;
 
     color: #111111;
+}
+
+/* [atelier] 한 줄로 눕히되, 자리가 모자라면 줄을 바꾼다. 잘리면 읽을 수 없다. */
+#instructions .hint-item {
+    flex: none;
+    white-space: nowrap;
 }
 
 #footer {
@@ -249,7 +263,6 @@ body {
 }
 
 .do-button-active {
-    margin-top: 200px;
 
     background: rgb(30, 100, 130);
 }
@@ -263,11 +276,175 @@ body {
 }
 
 .do-button-inactive {
-    margin-top: 200px;
 
     cursor: default;
 
     background: #666666;
+}
+
+
+/* ── [atelier] 브러시 라이브러리 ─────────────────────────────
+   원본에 없던 패널이다. 왼쪽 도구 패널은 WebGL로 흐려 그리지만
+   이쪽은 그냥 CSS다 — 원본의 패널 배치를 건드리지 않으려고 따로 뒀다. */
+
+#brush-library {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 212px;
+    max-height: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    padding: 14px 10px 16px;
+    background: rgba(28, 28, 30, 0.93);
+    color: #e8e8ea;
+    font-family: 'Open Sans', sans-serif;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.library-title {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    margin-bottom: 10px;
+    color: #f2f2f4;
+}
+
+.library-list {
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+    margin: 0 -4px;
+    padding: 0 4px;
+}
+
+.library-group {
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #8a8a90;
+    margin: 12px 0 6px;
+}
+
+.library-group:first-child {
+    margin-top: 0;
+}
+
+/* 카드 하나가 붓 하나. 안의 그림은 그 붓의 붓털 배치를 쓸어 그린 것이다. */
+.brush-card {
+    position: relative;
+    border: 1px solid #3a3a3e;
+    border-radius: 6px;
+    background: #f4f1ea;
+    overflow: hidden;
+    cursor: pointer;
+    margin-bottom: 6px;
+}
+
+.brush-card:hover {
+    border-color: #5c5c62;
+}
+
+.brush-card.selected {
+    border-color: #ffffff;
+    box-shadow: 0 0 0 1px #ffffff;
+}
+
+.brush-card-thumb {
+    display: block;
+}
+
+.brush-card-label {
+    position: absolute;
+    left: 6px;
+    bottom: 4px;
+    padding: 1px 5px;
+    border-radius: 3px;
+    background: rgba(24, 24, 26, 0.72);
+    color: #f2f2f4;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+
+/* ── [atelier] 패널 여닫기 손잡이 ───────────────────────────── */
+
+.panel-toggle {
+    position: absolute;
+    top: 50%;
+    width: 22px;
+    height: 68px;
+    margin-top: -34px;
+    background: rgba(28, 28, 30, 0.9);
+    color: #d8d8dc;
+    cursor: pointer;
+    z-index: 20;
+    transition: left 180ms ease, right 180ms ease, background 120ms;
+}
+
+.panel-toggle:hover {
+    background: rgba(52, 52, 56, 0.95);
+}
+
+/* 손잡이 안의 화살표. 접히면 방향이 뒤집힌다. */
+.panel-toggle::before {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 11px;
+    line-height: 1;
+}
+
+#tools-toggle {
+    left: 300px;
+    border-radius: 0 5px 5px 0;
+}
+
+#tools-toggle.collapsed {
+    left: 0;
+}
+
+#tools-toggle::before {
+    content: '\25C0';
+}
+
+#tools-toggle.collapsed::before {
+    content: '\25B6';
+}
+
+#library-toggle {
+    right: 212px;
+    border-radius: 5px 0 0 5px;
+}
+
+#library-toggle.collapsed {
+    right: 0;
+}
+
+#library-toggle::before {
+    content: '\25B6';
+}
+
+#library-toggle.collapsed::before {
+    content: '\25C0';
+}
+
+#brush-library {
+    transition: transform 180ms ease;
+}
+
+#brush-library.collapsed {
+    transform: translateX(100%);
+}
+
+
+/* [atelier] 펜/손가락이 페이지를 스크롤하지 않게 한다. 안 그러면 획이 끊긴다. */
+canvas {
+    touch-action: none;
 }
 
 
@@ -276,28 +453,23 @@ body {
 
 .control-hint {
     margin-left: 30px;
-    margin-top: 1px;
-    margin-bottom: 1px;
+    margin-top: 2px;
+    margin-bottom: 2px;
 
     color: rgba(255, 255, 255, 0.45);
     font-size: 10px;
-    line-height: 1.3;
+    line-height: 1.35;
 }
 
-#instructions .hint-item {
-    flex: none;
-    white-space: nowrap;
-}
-
-/* 색 고르개가 WebGL 로 그려지는 자리. DOM 흐름에서 높이만 차지한다. */
+/* 색상환이 WebGL 로 그려지는 자리. DOM 흐름에서 높이만 차지한다. */
 #color-wheel-space {
     height: 200px;
 }
 
 
 /* ── [atelier] 물감 팔레트와 쓰던 색 ─────────────────────────
-   색 고르개만으로는 "그 색"을 다시 찾기 어렵다. 유화는 원래 정해진
-   안료를 짜서 쓰므로 고전 안료를 그대로 칸으로 둔다. */
+   색상환만으로는 원하는 색을 짚기 어렵다. 유화 물감은 원래
+   정해진 안료를 짜서 쓰므로, 고전 안료를 그대로 칸으로 둔다. */
 
 .swatches {
     margin-left: 30px;
@@ -347,8 +519,8 @@ body {
 
 
 /* ── [atelier] 붓 커서 ───────────────────────────────────────
-   원본은 캔버스 위에서 cursor: none 인데 대신 그리는 것이 없어서,
-   붓이 어디에 얼마만큼 닿는지 보이지 않는다.
+   마우스에서는 붓이 지금 어디에 얼마만큼 닿는지 보이지 않으면
+   그릴 수가 없다. 펜·터치에서는 손가락이 곧 커서라 숨긴다.
 
    흰 링과 검은 링을 겹쳐 그린다. 한 색만 쓰면 밝은 물감 위나
    어두운 물감 위 둘 중 하나에서 반드시 안 보인다. */

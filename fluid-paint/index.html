@@ -15,17 +15,6 @@
             <div id="ui">
                 <div id="clear-button" class="button">전부 지우기</div><div id="save-button" class="button">그림 저장</div>
 
-                <div class="control-label">물감 색</div>
-                <div class="control-hint">사각형은 색, 가운데 띠는 색상, 오른쪽 띠는 물감 양</div>
-                <!-- 색 고르개는 WebGL 로 이 자리에 그린다. 높이만큼 자리를 비워 둔다. -->
-                <div id="color-wheel-space"></div>
-
-                <div class="control-label">쓰던 색</div>
-                <div id="recent-colors" class="swatches"></div>
-
-                <div class="control-label">유화 물감</div>
-                <div id="palette" class="swatches"></div>
-
                 <div class="control-label">화질</div>
                 <div class="buttons" id="qualities"></div>
                 <div style="clear:both"></div>
@@ -39,48 +28,50 @@
                 <div class="control-hint">오른쪽일수록 묽어서 잘 번진다</div>
                 <div id="fluidity-slider" class="slider"></div>
 
-                <div class="control-label">붓털 개수</div>
-                <div class="control-hint">적으면 성글고 거칠다</div>
+                <div class="control-label">붓 납작함</div>
+                <div class="control-hint">오른쪽일수록 납작한 평붓</div>
                 <div id="bristles-slider" class="slider"></div>
 
                 <div class="control-label">붓 크기</div>
                 <div class="control-hint">휠을 굴려도 바뀐다</div>
                 <div id="size-slider" class="slider"></div>
 
-                <!-- [atelier] 붓을 얼마나 세워 쥐는가 -->
-                <div class="control-label">붓 세운 정도</div>
-                <div class="control-hint">왼쪽은 눕힌 붓, 오른쪽은 세운 붓</div>
-                <div id="upright-slider" class="slider"></div>
+                <!-- [atelier] 손떨림 안정화 (1€ 필터) -->
+                <div class="control-label">손떨림 잡기</div>
+                <div class="control-hint">오른쪽일수록 선이 매끄럽지만 손을 늦게 따라온다</div>
+                <div id="stabilizer-slider" class="slider"></div>
 
-                <!-- [atelier] 한쪽으로 기울인 각. 한 붓 안에서는 고정된다 -->
-                <div class="control-label">붓 기울기</div>
-                <div class="control-hint">한쪽으로 눕힌 각. 획 내내 유지된다</div>
-                <div id="tilt-slider" class="slider"></div>
+                <!-- [atelier] 붓이 캔버스 색을 집어 오는 정도 (libmypaint smudge) -->
+                <div class="control-label">색 집어오기</div>
+                <div class="control-hint">이미 칠한 색을 붓이 묻혀 끌고 간다</div>
+                <div id="smudge-slider" class="slider"></div>
 
-                <!-- [atelier] 물감이 붓을 따라 끌려가는 정도 -->
-                <div class="control-label">물감 끌림</div>
-                <div class="control-hint">오른쪽일수록 물감이 붓을 따라 늘어진다</div>
-                <div id="slip-slider" class="slider"></div>
+                <!-- [atelier] 마감. 왼쪽이 마른 물감, 오른쪽이 젖은 유화 -->
+                <div class="control-label">광택</div>
+                <div class="control-hint">왼쪽은 마른 물감, 오른쪽은 갓 칠한 유화</div>
+                <div id="gloss-slider" class="slider"></div>
 
-                <!-- [atelier] 붓털 밀도 -->
-                <div class="control-label">붓털 밀도</div>
-                <div class="control-hint">오른쪽일수록 가운데가 빽빽하다</div>
-                <div id="density-slider" class="slider"></div>
+                <div class="control-label">물감 색</div>
+                <!-- 색상환은 WebGL 로 이 자리에 그린다. 높이만큼 자리를 비워 둔다. -->
+                <div id="color-wheel-space"></div>
 
-                <!-- [atelier] 붓털이 얼마나 묶여 있는가 -->
-                <div class="control-label">붓털 묶임</div>
-                <div class="control-hint">오른쪽으로 갈수록 눌렀을 때 털이 흩어진다</div>
-                <div id="gather-slider" class="slider"></div>
+                <div class="control-label">쓰던 색</div>
+                <div id="recent-colors" class="swatches"></div>
 
-                <!-- [atelier] 형태를 유지하는 마디 수 -->
-                <div class="control-label">붓 뻣뻣함</div>
-                <div class="control-hint">왼쪽은 흐물거려 붓털 자국이 길게 끌린다</div>
-                <div id="stiffness-slider" class="slider"></div>
+                <div class="control-label">유화 물감</div>
+                <div id="palette" class="swatches"></div>
 
                 <div id="undo-button" class="button">되돌리기</div><div id="redo-button" class="button">다시 하기</div>
             </div>
 
-            <!-- [atelier] 붓 커서. 원본은 캔버스 위에서 cursor:none 인데 대신 그리는 게 없었다 -->
+
+            <!-- [atelier] 패널 여닫기 손잡이와 브러시 라이브러리 -->
+            <div id="tools-toggle" class="panel-toggle" title="도구 패널 여닫기 (Tab)"></div>
+            <div id="library-toggle" class="panel-toggle" title="브러시 목록 여닫기 (Tab)"></div>
+            <div id="brush-library"></div>
+
+            <!-- [atelier] 붓 커서. 원본은 붓털 와이어프레임을 WebGL 로 그렸는데
+                 붓털을 걷어내면서 같이 사라졌다. 고정 붓이므로 발자국 하나면 된다. -->
             <svg id="brush-cursor" viewBox="-100 -100 200 200" aria-hidden="true">
                 <ellipse class="ring-outer" cx="0" cy="0" rx="90" ry="90"></ellipse>
                 <ellipse class="ring-inner" cx="0" cy="0" rx="90" ry="90"></ellipse>
@@ -92,6 +83,7 @@
                 <div class="hint-item"><span>휠</span> 붓 크기</div>
                 <div class="hint-item"><span>스페이스 + 끌기</span> 화면 이동</div>
                 <div class="hint-item"><span>가장자리 끌기</span> 캔버스 크기</div>
+                <div class="hint-item"><span>Tab</span> 패널 여닫기</div>
             </div>
 
             <div id="footer">
@@ -112,12 +104,14 @@
         <script src="wrappedgl.js"></script>
         <script src="utilities.js"></script>
         <script src="rectangle.js"></script>
-        <script src="brush.js"></script>
         <script src="simulator.js"></script>
         <script src="colorpicker.js"></script>
         <script src="slider.js"></script>
         <script src="buttons.js"></script>
         <!--<script src="brushviewer.js"></script>-->
+        <script src="tip.js"></script>
+        <script src="filter.js"></script>
+        <script src="brushlibrary.js"></script>
         <script src="paint.js"></script>
 
         <script>

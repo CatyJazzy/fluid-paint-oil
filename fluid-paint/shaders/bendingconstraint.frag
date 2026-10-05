@@ -10,8 +10,6 @@ uniform int u_pass; //0, 1 or 2, 0 means we do 0-1-2, 3-4-5, 6-7-8, 1 means we d
 
 uniform float u_stiffnessVariation;
 
-uniform float u_pinnedCount; // [atelier] 고정할 마디 수
-
 float length2(vec3 v) {
     return v.x * v.x + v.y * v.y + v.z * v.z;
 }
@@ -32,11 +30,10 @@ void main () {
 
         vec3 aPos = texture2D(u_positionsTexture, vec2(coordinates.x, (aIndex + 0.5) / u_pointCount)).rgb;
         float aW = 1.0;
-        if (aIndex < u_pinnedCount - 0.9) aW = 0.0;
+        if (aIndex < 0.1) aW = 0.0;
 
         vec3 bPos = texture2D(u_positionsTexture, vec2(coordinates.x, (bIndex + 0.5) / u_pointCount)).rgb;
         float bW = 1.0;
-        if (bIndex < u_pinnedCount - 0.9) bW = 0.0;
 
         vec3 cPos = texture2D(u_positionsTexture, vec2(coordinates.x, (cIndex + 0.5) / u_pointCount)).rgb;
         float cW = 1.0;

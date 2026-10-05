@@ -154,6 +154,12 @@ void main () {
     float diffuse = saturate(dot(lightDirection, normal));
     diffuse = diffuse * u_diffuseScale + (1.0 - u_diffuseScale);
 
+    // [atelier] 평평한 자리의 밝기를 1로 맞춘다.
+    // 확산광 비중을 올리면 물감뿐 아니라 빈 캔버스까지 같이 어두워지기 때문이다.
+    // ('flat' 은 GLSL 예약어라 쓸 수 없다)
+    float levelLight = saturate(dot(lightDirection, vec3(0.0, 0.0, 1.0)));
+    diffuse /= max(levelLight * u_diffuseScale + (1.0 - u_diffuseScale), 0.0001);
+
 
     float specular = specularBRDF(lightDirection, eyeDirection, normal, u_roughness, u_F0);
 

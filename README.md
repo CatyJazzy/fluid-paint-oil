@@ -1,3 +1,7 @@
+> **This is the `fixed-tip` branch.** The bristle solver is gone; the brush is a
+> stamped tip mask instead. For the bristle-simulation line — and the full README —
+> see [`main`](../../tree/main).
+
 # fluid-paint-oil
 
 A fork of [David Li's Fluid Paint](https://github.com/dli/paint) tuned toward **oil
