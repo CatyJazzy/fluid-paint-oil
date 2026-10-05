@@ -1,0 +1,391 @@
+* {
+    font-family: 'Open Sans', Helvetica, sans-serif;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+}
+
+#ui {
+    /* [atelier] pointer-events 는 none 으로 둔다 — auto 로 두면 이 div 가 클릭을
+       가로채서, 밑의 캔버스에 WebGL 로 그려 둔 색 고르개를 집을 수 없다.
+       버튼·슬라이더·팔레트만 각자 auto 다. 휠 스크롤은 onWheel 이 처리한다. */
+    pointer-events: none;
+
+    position: absolute;
+
+    top: 0;
+    left: 0;
+
+    width: 300px;
+
+    /* 옵션이 늘면서 내용이 창보다 길어졌다. 창을 넘으면 스크롤한다. */
+    max-height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
+}
+
+#ui::-webkit-scrollbar {
+    width: 6px;
+}
+
+#ui::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 3px;
+}
+
+#ui::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+
+.button {
+    display: inline-block;
+
+    margin-top: 24px;
+
+    width: 115px;
+    height: 30px;
+    line-height: 30px;
+
+    text-align: center;
+    font-size: 12px;
+    color: white;
+
+    cursor: pointer;
+
+    pointer-events: auto;
+}
+
+#clear-button {
+    margin-left: 30px;
+
+    background: rgb(220, 0, 40);
+}
+
+#clear-button:hover {
+    background: rgb(210, 0, 30);
+}
+
+#clear-button:active {
+    background: rgb(200, 0, 20);
+}
+
+#save-button {
+    background: rgb(0, 170, 50);
+
+    margin-left: 10px;
+}
+
+#save-button:hover {
+    background: rgb(0, 160, 40);
+}
+
+#save-button:active {
+    background: rgb(0, 150, 30);
+}
+
+
+.control-label {
+    margin-left: 30px;
+    /* [atelier] 슬라이더가 늘어 패널이 창을 넘는다. 줄 간격을 줄였다. */
+    margin-top: 4px;
+
+    color: white;
+    font-size: 12px;
+}
+
+.slider {
+    margin-top: 1px;
+    margin-left: 30px;
+
+    position: relative;
+
+    width: 240px;
+    height: 15px;
+
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+
+    cursor: ew-resize;
+
+    pointer-events: auto;
+}
+
+.buttons {
+    margin-top: 7px;
+    margin-left: 30px;
+
+    height: 26px;
+}
+
+.buttons div {
+    box-sizing: border-box;
+
+    float: left;
+    width: 80px;
+
+    padding: 3px 0px;
+
+    border-top: 1px solid white;
+    border-bottom: 1px solid white;
+    border-left: 1px solid white;
+
+    font-size: 11px;
+    text-align: center;
+
+    pointer-events: auto;
+}
+
+.buttons div:first-child {
+    border-left: 1px solid white;
+}
+
+.buttons div:last-child {
+    border-right: 1px solid white;
+}
+
+#qualities div {
+    width: 80px;
+}
+
+#models div {
+    width: 120px;
+}
+
+.button-selected {
+    background: white;
+    color: black;
+
+    cursor: default;
+}
+
+.button-unselected {
+    color: white;
+
+    cursor: pointer;
+}
+
+#instructions {
+    position: absolute;
+
+    /* [atelier] 슬라이더가 늘면서 패널이 안내문 자리까지 내려왔다 */
+    bottom: 10px;
+    left: 320px;
+    right: 20px;
+
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 4px 16px;
+
+    line-height: 16px;
+    font-size: 12px;
+    color: #111111;
+
+    pointer-events: none;
+}
+
+#instructions span {
+    font-weight: bold;
+
+    color: #111111;
+}
+
+#footer {
+    position: absolute;
+
+    bottom: 24px;
+    right: 30px;
+
+    color: #111111;
+    font-size: 12px;
+    line-height: 16px;
+}
+
+#footer a {
+    color: #111111;
+}
+
+#no-support-container {
+    position: absolute;
+    width: 100%;
+    height: 30px;
+    top: 50%;
+    margin-top: -15px;
+
+    text-align: center;
+    font-size: 16px;
+
+    color: #333333;
+}
+
+#no-support-container a {
+    color: #333333;
+}
+
+#backlink {
+    margin-top: 20px;
+}
+
+#undo-button {
+    margin-left: 30px;
+}
+
+#redo-button {
+    margin-left: 10px;
+}
+
+.do-button-active {
+    margin-top: 200px;
+
+    background: rgb(30, 100, 130);
+}
+
+.do-button-active:hover {
+    background: rgb(20, 90, 120);
+}
+
+.do-button-active:active {
+    background: rgb(10, 80, 110);
+}
+
+.do-button-inactive {
+    margin-top: 200px;
+
+    cursor: default;
+
+    background: #666666;
+}
+
+
+/* ── [atelier] 한국어 라벨 아래 붙는 한 줄 설명 ───────────────
+   옵션 이름만으로는 뭐가 바뀌는지 알 수 없는 것들이 있다. */
+
+.control-hint {
+    margin-left: 30px;
+    margin-top: 1px;
+    margin-bottom: 1px;
+
+    color: rgba(255, 255, 255, 0.45);
+    font-size: 10px;
+    line-height: 1.3;
+}
+
+#instructions .hint-item {
+    flex: none;
+    white-space: nowrap;
+}
+
+/* 색 고르개가 WebGL 로 그려지는 자리. DOM 흐름에서 높이만 차지한다. */
+#color-wheel-space {
+    height: 200px;
+}
+
+
+/* ── [atelier] 물감 팔레트와 쓰던 색 ─────────────────────────
+   색 고르개만으로는 "그 색"을 다시 찾기 어렵다. 유화는 원래 정해진
+   안료를 짜서 쓰므로 고전 안료를 그대로 칸으로 둔다. */
+
+.swatches {
+    margin-left: 30px;
+    margin-right: 30px;
+    margin-top: 4px;
+
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 4px;
+
+    pointer-events: auto;
+}
+
+.swatch {
+    position: relative;
+
+    aspect-ratio: 1;
+    border-radius: 3px;
+
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.35),
+                inset 0 1px 0 rgba(255, 255, 255, 0.25);
+
+    cursor: pointer;
+    transition: transform 90ms ease;
+}
+
+.swatch:hover {
+    transform: scale(1.18);
+    z-index: 1;
+}
+
+.swatch.selected {
+    box-shadow: 0 0 0 2px white,
+                inset 0 0 0 1px rgba(0, 0, 0, 0.35);
+}
+
+/* 쓰던 색은 아직 안 채워진 칸도 자리를 지켜야 줄이 안 흔들린다 */
+.swatch.empty {
+    background: rgba(255, 255, 255, 0.06);
+    box-shadow: none;
+    cursor: default;
+}
+
+.swatch.empty:hover {
+    transform: none;
+}
+
+
+/* ── [atelier] 붓 커서 ───────────────────────────────────────
+   원본은 캔버스 위에서 cursor: none 인데 대신 그리는 것이 없어서,
+   붓이 어디에 얼마만큼 닿는지 보이지 않는다.
+
+   흰 링과 검은 링을 겹쳐 그린다. 한 색만 쓰면 밝은 물감 위나
+   어두운 물감 위 둘 중 하나에서 반드시 안 보인다. */
+
+#brush-cursor {
+    position: absolute;
+    left: 0;
+    top: 0;
+
+    pointer-events: none;
+    overflow: visible;
+
+    display: none;
+}
+
+#brush-cursor.visible {
+    display: block;
+}
+
+#brush-cursor ellipse {
+    fill: none;
+    vector-effect: non-scaling-stroke;
+}
+
+#brush-cursor .ring-outer {
+    stroke: rgba(0, 0, 0, 0.55);
+    stroke-width: 3;
+}
+
+#brush-cursor .ring-inner {
+    stroke: rgba(255, 255, 255, 0.9);
+    stroke-width: 1.5;
+}
+
+#brush-cursor .dot {
+    fill: rgba(255, 255, 255, 0.9);
+    stroke: rgba(0, 0, 0, 0.55);
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+}
